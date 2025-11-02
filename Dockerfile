@@ -10,15 +10,19 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir numpy==1.21.0 && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy application code and ensure directory structure
 COPY src/ src/
 COPY README.md .
 
+# Create necessary directories
+RUN mkdir -p src/static src/templates
+
 # Set environment variables
 ENV PORT=8000
+ENV ENV=production
+ENV PYTHONPATH=/app
 
 # Run the application
-CMD uvicorn src.main:app --host 0.0.0.0 --port $PORT
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "$PORT", "--workers", "4"]

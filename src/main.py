@@ -14,14 +14,24 @@ app = FastAPI()
 # Get the current file's directory
 BASE_DIR = Path(__file__).resolve().parent
 
+# Ensure static and template directories exist
+static_dir = BASE_DIR / "static"
+templates_dir = BASE_DIR / "templates"
+static_dir.mkdir(exist_ok=True)
+templates_dir.mkdir(exist_ok=True)
+
 # Mount static files and templates with correct paths
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+templates = Jinja2Templates(directory=str(templates_dir))
 
 # Add health check endpoint
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "environment": os.getenv("ENV", "production"),
+        "base_dir": str(BASE_DIR)
+    }
 
 class StockRequest(BaseModel):
     ticker: str
@@ -40,7 +50,4 @@ async def analyze_stock(stock_request: StockRequest):
         return {"metrics": metrics, "explanation": explanation}
     except Exception as e:
         print(f"Error processing request: {str(e)}")
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Could not analyze stock {stock_request.ticker}: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=str(e))
