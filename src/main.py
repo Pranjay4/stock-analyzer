@@ -7,6 +7,7 @@ from .api.financial_data import fetch_financial_data
 from .api.llm import get_explanation
 from .services.analysis import analyze_financials
 from pydantic import BaseModel
+import os
 
 app = FastAPI()
 
@@ -16,6 +17,11 @@ BASE_DIR = Path(__file__).resolve().parent
 # Mount static files and templates with correct paths
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+
+# Add health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
 class StockRequest(BaseModel):
     ticker: str
