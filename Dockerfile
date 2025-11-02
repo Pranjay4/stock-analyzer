@@ -11,8 +11,8 @@ RUN pip install --upgrade pip && \
 COPY src/ src/
 COPY README.md .
 
-# Set environment variables
+# Set environment variables with a default port
 ENV PORT=8000
 
-# Run the application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
+# Run the application using shell form to evaluate environment variables
+CMD uvicorn src.main:app --host 0.0.0.0 --port $PORT
