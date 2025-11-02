@@ -21,8 +21,13 @@ RUN mkdir -p src/static src/templates
 
 # Set environment variables
 ENV PORT=8000
-ENV ENV=production
 ENV PYTHONPATH=/app
 
+# Create start script
+RUN echo '#!/bin/bash\n\
+PORT="${PORT:-8000}"\n\
+uvicorn src.main:app --host 0.0.0.0 --port "$PORT"' > start.sh && \
+    chmod +x start.sh
+
 # Run the application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "$PORT", "--workers", "4"]
+CMD ["./start.sh"]
